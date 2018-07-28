@@ -2,7 +2,9 @@ package com.oocl.company.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.oocl.company.controllers.DTO.CompanyDTO;
+import com.oocl.company.controllers.DTO.EmployeeDTO;
 import com.oocl.company.entities.Company;
+import com.oocl.company.entities.Employee;
 import com.oocl.company.service.CompanyService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -19,8 +21,10 @@ import java.util.List;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.isEmptyString;
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -81,5 +85,23 @@ public class CompanyControllerTest {
         mockMvc.perform(get("/api/v1/companies/1").contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(jsonPath("id", is(1)))
                 .andExpect(jsonPath("name", is("oocl")));
+    }
+
+    @Test
+    public void should_get_employeeDTO_list_when_get_employees_by_company() throws Exception {
+    // given
+        Employee employee = new Employee(1L, "tmy", "male");
+        EmployeeDTO employeeDTO = new EmployeeDTO(employee);
+        List<EmployeeDTO> employeeDTOS = new ArrayList<>();
+        employeeDTOS.add(employeeDTO);
+
+        given(companyService.getEmployeesByCompany(anyLong())).willReturn(employeeDTOS);
+    // when
+    // then
+        mockMvc.perform(get("/api/v1/companies/1/employees").contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(jsonPath("$",hasSize(1)))
+                .andExpect(jsonPath("$[0].id", is(1)))
+                .andExpect(jsonPath("$[0].name", is("tmy")))
+                .andExpect(jsonPath("$[0].gender", is("male")));
     }
 }

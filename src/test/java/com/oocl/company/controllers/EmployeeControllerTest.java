@@ -33,9 +33,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -144,5 +142,20 @@ public class EmployeeControllerTest {
                 .content(mapper.writeValueAsString(employee)))
                 .andExpect(status().isBadRequest())
                 .andDo(print());
+    }
+
+    @Test
+    public void should_return_employeeDTO_when_delete_employee_by_id() throws Exception{
+    // given
+        Employee employee = new Employee(1L, "name", "male");
+        EmployeeDTO employeeDTO = new EmployeeDTO(employee);
+        given(employeeService.deleteEmployeeById(anyLong())).willReturn(employeeDTO);
+    // when
+    // then
+        mockMvc.perform(delete("/api/v1/employees/1").contentType(MediaType.APPLICATION_JSON_VALUE)
+                            .content(mapper.writeValueAsString(employee)))
+                .andExpect(jsonPath("id", is(1)))
+                .andExpect(jsonPath("name", is("name")))
+                .andExpect(jsonPath("gender", is("male")));
     }
 }

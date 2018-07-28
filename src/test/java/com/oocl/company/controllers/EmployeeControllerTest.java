@@ -91,4 +91,23 @@ public class EmployeeControllerTest {
                 .andExpect(jsonPath("$[0].name", containsString("name")))
                 .andExpect(jsonPath("$[0].gender", is("male")));
     }
+
+    @Test
+    public void return_male_employeeDTO_list_when_getMaleEmployees() throws Exception {
+        //given
+        EmployeeDTO employeeDTO = new EmployeeDTO(new Employee(1L, "test-name", "male"));
+
+        List<EmployeeDTO> employeeDTOS = new ArrayList<>();
+        employeeDTOS.add(employeeDTO);
+        given(employeeService.getEmployeeByGender("male")).willReturn(employeeDTOS);
+
+        //when
+        //then
+        mockMvc.perform(get("/api/v1/employees/male").contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath("$[0].id", is(1)))
+                .andExpect(jsonPath("$[0].name", containsString("name")))
+                .andExpect(jsonPath("$[0].gender", is("male")));
+    }
 }

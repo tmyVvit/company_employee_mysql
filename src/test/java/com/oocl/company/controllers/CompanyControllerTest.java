@@ -26,9 +26,7 @@ import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -119,5 +117,18 @@ public class CompanyControllerTest {
                 .andExpect(jsonPath("id", is(1)))
                 .andExpect(jsonPath("name", is("oocl")));
 
+    }
+
+    @Test
+    public void should_get_the_company_when_delete_company_by_id() throws Exception {
+    // given
+        Company company = new Company(1L, "oocl");
+
+        given(companyService.deleteCompanyById(1L)).willReturn(company);
+    // when
+    // then
+        mockMvc.perform(delete("/api/v1/companies/1"))
+                .andExpect(jsonPath("id", is(1)))
+                .andExpect(jsonPath("name", is("oocl")));
     }
 }

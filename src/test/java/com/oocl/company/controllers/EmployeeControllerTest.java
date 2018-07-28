@@ -32,6 +32,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -109,5 +111,17 @@ public class EmployeeControllerTest {
                 .andExpect(jsonPath("$[0].id", is(1)))
                 .andExpect(jsonPath("$[0].name", containsString("name")))
                 .andExpect(jsonPath("$[0].gender", is("male")));
+    }
+
+    @Test
+    public void return_created_status_when_post_employee() throws Exception{
+    // given
+        Employee employee = new Employee(1L, "test", "male");
+        given(employeeService.save(any(Employee.class))).willReturn(true);
+    // when
+    // then
+        mockMvc.perform(post("/api/v1/employees").contentType(MediaType.APPLICATION_JSON_VALUE).content(mapper.writeValueAsString(employee)))
+                .andExpect(status().isCreated())
+                .andDo(print());
     }
 }

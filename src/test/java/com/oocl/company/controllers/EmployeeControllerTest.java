@@ -3,6 +3,7 @@ package com.oocl.company.controllers;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.oocl.company.controllers.DTO.EmployeeDTO;
 import com.oocl.company.entities.Employee;
+import com.oocl.company.exceptions.BadRequestException;
 import com.oocl.company.service.EmployeeService;
 import net.bytebuddy.asm.Advice;
 import org.junit.Test;
@@ -57,6 +58,7 @@ public class EmployeeControllerTest {
 
 
         given(employeeService.getEmployeeById(1L)).willReturn(employeeDTO);
+        given(employeeService.getEmployeeById(2L)).willThrow(new BadRequestException());
 
         //whenL
         //then
@@ -65,6 +67,9 @@ public class EmployeeControllerTest {
                 .andExpect(jsonPath("id", is(1)))
                 .andExpect(jsonPath("name", containsString("name")))
                 .andExpect(jsonPath("gender", is("male")));
+
+        mockMvc.perform(get("/api/v1/employees/2").contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isBadRequest());
     }
 
 

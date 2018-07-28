@@ -62,12 +62,11 @@ public class EmployeeController {
     }
 
     @PutMapping(path = "/{employeeID}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public EmployeeDTO updateEmployeeById(@PathVariable Long employeeID, @RequestBody Employee employee){
-        EmployeeDTO employeeDTO = employeeService.updateEmployee(employeeID, employee);
-        if(employeeDTO == null){
-            throw new BadRequestException("employee not exists");
+    public ResponseEntity updateEmployeeById(@PathVariable Long employeeID, @RequestBody Employee employee){
+        if(employeeService.updateEmployee(employeeID, employee)){
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
         }
-        return employeeDTO;
+        throw new BadRequestException("employee not exists");
     }
 
     @DeleteMapping(path = "/{employeeID}", produces = MediaType.APPLICATION_JSON_VALUE)

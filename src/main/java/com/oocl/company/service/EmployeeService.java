@@ -40,15 +40,15 @@ public class EmployeeService {
         return employeeRepository.findByGender(gender).stream().map(EmployeeDTO::new).collect(Collectors.toList());
     }
 
-    public EmployeeDTO updateEmployee(Long employeeID, Employee employee) {
+    public boolean updateEmployee(Long employeeID, Employee employee) {
         Employee emp = employeeRepository.findById(employeeID).orElse(null);
         if(emp == null){
-            return null;
+            return false;
         }
         employee.setId(emp.getId());
         employee.setCompany(emp.getCompany());
         employeeRepository.save(employee);
-        return new EmployeeDTO(employee);
+        return true;
     }
 
     public EmployeeDTO deleteEmployeeById(Long employeeID) {

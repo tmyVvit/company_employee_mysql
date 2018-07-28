@@ -29,10 +29,13 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -120,8 +123,26 @@ public class EmployeeControllerTest {
         given(employeeService.save(any(Employee.class))).willReturn(true);
     // when
     // then
-        mockMvc.perform(post("/api/v1/employees").contentType(MediaType.APPLICATION_JSON_VALUE).content(mapper.writeValueAsString(employee)))
+        mockMvc.perform(post("/api/v1/employees").contentType(MediaType.APPLICATION_JSON_VALUE).
+                        content(mapper.writeValueAsString(employee)))
                 .andExpect(status().isCreated())
+                .andDo(print());
+    }
+
+    @Test
+    public void should_retturn_no_content_status_when_update_employee() throws Exception{
+    // given
+        Employee employee = new Employee(1L, "name", "male");
+        given(employeeService.updateEmployee(anyLong(), any(Employee.class))).willReturn(true, false);
+    // when
+    // then
+        mockMvc.perform(put("/api/v1/employees/1").contentType(MediaType.APPLICATION_JSON_VALUE)
+                            .content(mapper.writeValueAsString(employee)))
+                .andExpect(status().isNoContent())
+                .andDo(print());
+        mockMvc.perform(put("/api/v1/employees/2").contentType(MediaType.APPLICATION_JSON_VALUE)
+                .content(mapper.writeValueAsString(employee)))
+                .andExpect(status().isBadRequest())
                 .andDo(print());
     }
 }

@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
@@ -35,6 +36,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(EmployeeController.class)
+@EnableSpringDataWebSupport
 public class EmployeeControllerTest {
 
 
@@ -54,9 +56,9 @@ public class EmployeeControllerTest {
         EmployeeDTO employeeDTO = new EmployeeDTO(new Employee(1L, "test-name", "male"));
 
 
-        given(employeeService.getEmployeeById(any())).willReturn(employeeDTO);
+        given(employeeService.getEmployeeById(1L)).willReturn(employeeDTO);
 
-        //when
+        //whenL
         //then
         mockMvc.perform(get("/api/v1/employees/1").contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk())
@@ -65,4 +67,23 @@ public class EmployeeControllerTest {
                 .andExpect(jsonPath("gender", is("male")));
     }
 
+
+    @Test
+    public void return_employeeDTO_list_when_getEmployees() throws Exception {
+        //given
+        EmployeeDTO employeeDTO = new EmployeeDTO(new Employee(1L, "test-name", "male"));
+
+        List<EmployeeDTO> employeeDTOS = new ArrayList<>();
+        employeeDTOS.add(employeeDTO);
+        given(employeeService.getEmployees(any())).willReturn(employeeDTOS);
+
+        //when
+        //then
+        mockMvc.perform(get("/api/v1/employees?page=1&size=1").contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath("$[0].id", is(1)))
+                .andExpect(jsonPath("$[0].name", containsString("name")))
+                .andExpect(jsonPath("$[0].gender", is("male")));
+    }
 }

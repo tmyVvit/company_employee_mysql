@@ -24,12 +24,10 @@ import java.util.List;
 public class CompanyController {
 
     private CompanyService companyService;
-    private EmployeeService employeeService;
 
     @Autowired
-    public CompanyController(CompanyService companyService, EmployeeService employeeService){
+    public CompanyController(CompanyService companyService){
         this.companyService = companyService;
-        this.employeeService = employeeService;
     }
 
     @PostMapping(path = "", produces = MediaType.APPLICATION_JSON_VALUE)

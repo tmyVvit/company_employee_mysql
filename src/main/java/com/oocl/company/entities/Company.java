@@ -22,7 +22,7 @@ public class Company {
     @CreatedDate
     private ZonedDateTime create_date = ZonedDateTime.now();
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "company", fetch = FetchType.LAZY)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "company", fetch = FetchType.EAGER)
     private List<Employee> employees = new ArrayList<>();
 
     public Company(){}

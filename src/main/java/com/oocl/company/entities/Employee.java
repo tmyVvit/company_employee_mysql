@@ -16,11 +16,13 @@ public class Employee {
 
     private String name;
 
+    private String gender;
+
     @CreatedDate
     private ZonedDateTime create_date = ZonedDateTime.now();
 
     @JsonIgnore
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "company_id")
     private Company company;
 
@@ -58,7 +60,11 @@ public class Employee {
         this.company = company;
     }
 
+    public String getGender() {
+        return gender;
+    }
 
-
-
+    public void setGender(String gender) {
+        this.gender = gender;
+    }
 }

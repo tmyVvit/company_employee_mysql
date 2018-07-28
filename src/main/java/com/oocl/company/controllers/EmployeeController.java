@@ -7,14 +7,17 @@ import com.oocl.company.exceptions.BadRequestException;
 import com.oocl.company.exceptions.ResourceNotFoundException;
 import com.oocl.company.repositories.CompanyRepository;
 import com.oocl.company.repositories.EmployeeRepository;
+import com.oocl.company.service.EmployeeService;
 import org.aspectj.lang.annotation.DeclareError;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.transaction.Transactional;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,58 +25,64 @@ import java.util.List;
 @RequestMapping("/api/v1/employees")
 public class EmployeeController {
 
-    private EmployeeRepository employeeRepository;
+    private EmployeeService employeeService;
 
     @Autowired
-    private CompanyRepository companyRepository;
-
-    @Autowired
-    public EmployeeController(EmployeeRepository _employeeRepository){
-        employeeRepository = _employeeRepository;
+    public EmployeeController(EmployeeService employeeService){
+        this.employeeService = employeeService;
     }
 
-    @Transactional
     @GetMapping(path = "", produces = MediaType.APPLICATION_JSON_VALUE)
-    public List<EmployeeDTO> getAllEmployees(){
-        List<EmployeeDTO> employees = new ArrayList<>();
-//        List<Employee> employees = employeeRepository.findAll();
-        employeeRepository.findAll().stream().forEach(employee -> employees.add(new EmployeeDTO(employee)));
+    public List<EmployeeDTO> getAllEmployees(Pageable page){
+        List<EmployeeDTO> employees = employeeService.getEmployees(page);
+        if(employees.size() == 0){
+            throw new BadRequestException("page not exists");
+        }
         return employees;
     }
 
-    @Transactional
     @GetMapping(path = "/{employeeID}", produces = MediaType.APPLICATION_JSON_VALUE)
     public EmployeeDTO getEmployeeById(@PathVariable Long employeeID){
-        Employee employee=  employeeRepository.findById(employeeID).orElseThrow(()->new ResourceNotFoundException("company not found"));
-        return new EmployeeDTO(employee);
+        EmployeeDTO employeeDTO = employeeService.getEmployeeById(employeeID);
+        if(employeeDTO == null){
+            throw new BadRequestException("employee not exists");
+        }
+        return employeeDTO;
     }
 
-    @Transactional
+    @GetMapping(path = "/male", produces = MediaType.APPLICATION_JSON_VALUE)
+    public List<EmployeeDTO> getMaleEmployees(){
+        List<EmployeeDTO> employees = employeeService.getEmployeeByGender("male");
+        if(employees.size() == 0){
+            throw new BadRequestException("male employee not exists");
+        }
+        return employees;
+    }
+
+
     @PostMapping(path = "", produces = MediaType.APPLICATION_JSON_VALUE)
-    public EmployeeDTO saveEmployee(@RequestBody Employee employee){
-        return new EmployeeDTO(employeeRepository.save(employee));
+    public ResponseEntity saveEmployee(@RequestBody Employee employee){
+        if(employeeService.save(employee)){
+            return ResponseEntity.status(HttpStatus.CREATED).build();
+        }
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
     }
 
-    @Transactional
     @PutMapping(path = "/{employeeID}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity updateEmployeeById(@PathVariable Long employeeID, @RequestBody Employee employee){
-        Employee emp =  employeeRepository.findById(employeeID).orElseThrow(()-> new BadRequestException("bad request"));
-        employee.setId(employeeID);
-        employee.setCompany(emp.getCompany());
-        employeeRepository.save(employee);
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    public EmployeeDTO updateEmployeeById(@PathVariable Long employeeID, @RequestBody Employee employee){
+        EmployeeDTO employeeDTO = employeeService.updateEmployee(employeeID, employee);
+        if(employeeDTO == null){
+            throw new BadRequestException("employee not exists");
+        }
+        return employeeDTO;
     }
 
-    @Transactional
     @DeleteMapping(path = "/{employeeID}", produces = MediaType.APPLICATION_JSON_VALUE)
     public EmployeeDTO deleteEmployeeById(@PathVariable Long employeeID){
-        Employee employee = employeeRepository.findById(employeeID).orElseThrow(()->new ResourceNotFoundException("employee not found"));
-        EmployeeDTO employeeDTO = new EmployeeDTO(employee);
-        Company company = employee.getCompany();
-        if(company!= null){
-            company.deleteEmployee(employee);
+        EmployeeDTO employeeDTO = employeeService.deleteEmployeeById(employeeID);
+        if(employeeDTO == null){
+            throw new BadRequestException("employee not exists");
         }
-        employeeRepository.delete(employee);
         return employeeDTO;
     }
 }

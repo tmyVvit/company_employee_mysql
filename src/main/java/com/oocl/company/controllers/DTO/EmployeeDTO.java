@@ -7,11 +7,13 @@ import java.time.ZonedDateTime;
 public class EmployeeDTO {
     private final Long id;
     private final String name;
+    private final String gender;
     private Long companyID;
 
     public EmployeeDTO(Employee employee){
         id = employee.getId();
         name = employee.getName();
+        gender = employee.getGender();
         if(employee.getCompany() != null)
             companyID = employee.getCompany().getId();
     }
@@ -28,6 +30,7 @@ public class EmployeeDTO {
         return companyID;
     }
 
-
-
+    public String getGender() {
+        return gender;
+    }
 }

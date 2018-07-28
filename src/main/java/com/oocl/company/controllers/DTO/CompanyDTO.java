@@ -10,13 +10,15 @@ public class CompanyDTO {
     private final Long id;
     private final String name;
     private final ZonedDateTime create_date;
-    private final List<EmployeeDTO> employees;
+    //private final List<EmployeeDTO> employees;
+    private final int numberOfEmployees;
 
     public CompanyDTO(Company company) {
         id = company.getId();
         name = company.getName();
         create_date = company.getCreate_date();
-        employees = company.getEmployees().stream().map(employee -> new EmployeeDTO(employee)).collect(Collectors.toList());
+        //employees = company.getEmployees().stream().map(employee -> new EmployeeDTO(employee)).collect(Collectors.toList());
+        numberOfEmployees = company.getEmployees().size();
     }
 
     public Long getId() {
@@ -31,9 +33,11 @@ public class CompanyDTO {
         return create_date;
     }
 
-    public List<EmployeeDTO> getEmployees() {
-        return employees;
+//    public List<EmployeeDTO> getEmployees() {
+//        return employees;
+//    }
+    public int getNumberOfEmployees(){
+        return numberOfEmployees;
     }
-
 
 }

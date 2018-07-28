@@ -2,13 +2,17 @@ package com.oocl.company.controllers;
 
 
 import com.oocl.company.controllers.DTO.CompanyDTO;
+import com.oocl.company.controllers.DTO.EmployeeDTO;
 import com.oocl.company.entities.Company;
 import com.oocl.company.entities.Employee;
 import com.oocl.company.exceptions.BadRequestException;
 import com.oocl.company.exceptions.ResourceNotFoundException;
 import com.oocl.company.repositories.CompanyRepository;
 import com.oocl.company.repositories.EmployeeRepository;
+import com.oocl.company.service.CompanyService;
+import com.oocl.company.service.EmployeeService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -22,65 +26,75 @@ import java.util.List;
 @RequestMapping("/api/v1/companies")
 public class CompanyController {
 
-    private CompanyRepository companyRepository;
+    private CompanyService companyService;
+    private EmployeeService employeeService;
 
     @Autowired
-    private EmployeeRepository employeeRepository;
-
-    @Autowired
-    public CompanyController(CompanyRepository companyRepository){
-        this.companyRepository = companyRepository;
+    public CompanyController(CompanyService companyService, EmployeeService employeeService){
+        this.companyService = companyService;
+        this.employeeService = employeeService;
     }
 
-    @Transactional
     @PostMapping(path = "", produces = MediaType.APPLICATION_JSON_VALUE)
-    public CompanyDTO saveCompany(@RequestBody Company company){
-        company.getEmployees().stream().forEach(employee -> employee.setCompany(company));
-        companyRepository.save(company);
-        return new CompanyDTO(company);
+    public ResponseEntity saveCompany(@RequestBody Company company){
+        if(companyService.save(company)){
+            return ResponseEntity.status(HttpStatus.CREATED).build();
+        }
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
     }
 
-    @Transactional
     @GetMapping(path = "", produces = MediaType.APPLICATION_JSON_VALUE)
-    public List<CompanyDTO> getAllCompany(){
-        List<CompanyDTO> companies = new ArrayList<>();
-        companyRepository.findAll().stream().forEach(company -> companies.add(new CompanyDTO(company)));
-        return companies;
+    public List<CompanyDTO> getAllCompany(Pageable page){
+
+            List<CompanyDTO> companyDTOS = companyService.getAllCompany(page);
+            if(companyDTOS.size() == 0){
+                throw new BadRequestException("page not exist");
+            }
+            return companyDTOS;
     }
 
-    @Transactional
     @GetMapping(path = "/{companyID}", produces = MediaType.APPLICATION_JSON_VALUE)
     public CompanyDTO getAllCompany(@PathVariable Long companyID){
-        Company company = companyRepository.findById(companyID).orElseThrow(()->new ResourceNotFoundException("company not found"));
-        return new CompanyDTO(company);
-    }
-
-    @Transactional
-    @PutMapping(path = "/{companyID}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity updateCompanyById(@PathVariable Long companyID, @RequestBody Company company){
-        companyRepository.findById(companyID).orElseThrow(()-> new BadRequestException("bad request"));
-        company.setId(companyID);
-        companyRepository.save(company);
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-    }
-
-    @Transactional
-    @DeleteMapping(path = "/{companyID}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public CompanyDTO deleteCompanyById(@PathVariable Long companyID){
-        Company company = companyRepository.findById(companyID).orElseThrow(()->new ResourceNotFoundException("company not found"));
-        CompanyDTO companyDTO = new CompanyDTO(company);
-//        company.getEmployees().stream().forEach(employee -> employeeRepository.delete(employee));
-        companyRepository.delete(company);
+        CompanyDTO companyDTO = companyService.getById(companyID);
+        if(companyDTO == null){
+            throw new ResourceNotFoundException("page not exist");
+        }
         return companyDTO;
     }
 
-    @Transactional
+    @GetMapping(path = "/{companyID}/employees", produces = MediaType.APPLICATION_JSON_VALUE)
+    public List<EmployeeDTO> getEmployeesByCompany(@PathVariable Long companyID){
+        List<EmployeeDTO> employees = companyService.getEmployeesByCompany(companyID);
+        if(employees == null){
+            throw new BadRequestException("company not exist");
+        }
+        return employees;
+    }
+
+    @PutMapping(path = "/{companyID}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public CompanyDTO updateCompanyById(@PathVariable Long companyID, @RequestBody Company company){
+        CompanyDTO companyDTO = companyService.updateCompany(companyID, company);
+        if(companyDTO == null){
+            throw new BadRequestException("bad request, company not exist");
+        }
+        return companyDTO;
+    }
+
+    @DeleteMapping(path = "/{companyID}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Company deleteCompanyById(@PathVariable Long companyID){
+        Company company = companyService.deleteCompanyById(companyID);
+        if(company == null){
+            throw new BadRequestException("company not exist");
+        }
+        return company;
+    }
+
     @PatchMapping(path = "/{companyID}/employees", produces = MediaType.APPLICATION_JSON_VALUE)
-    public CompanyDTO addTheEmployeeToTheCompany(@PathVariable Long companyID, @RequestBody Employee employee){
-        Employee emp = employeeRepository.findById(employee.getId()).orElseThrow(()->new ResourceNotFoundException("Employee not found"));
-        Company company = companyRepository.findById(companyID).orElseThrow(()->new ResourceNotFoundException("company not found"));
-        emp.setCompany(company);
-        company.addEmployee(emp);
-        return new CompanyDTO(company);
+    public Company addTheEmployeeToTheCompany(@PathVariable Long companyID, @RequestBody Employee employee){
+        Company company = companyService.addEmployeeToCompany(companyID, employee.getId());
+        if(company == null){
+            throw new BadRequestException("company or employee not exist");
+        }
+        return company;
     }
 }

@@ -28,6 +28,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -103,5 +104,20 @@ public class CompanyControllerTest {
                 .andExpect(jsonPath("$[0].id", is(1)))
                 .andExpect(jsonPath("$[0].name", is("tmy")))
                 .andExpect(jsonPath("$[0].gender", is("male")));
+    }
+
+    @Test
+    public void should_get_updated_companyDTO_when_update_company_by_id() throws Exception {
+    // given
+        Company company = new Company(1L, "oocl");
+        CompanyDTO companyDTO = new CompanyDTO(company);
+        given(companyService.updateCompany(anyLong(), any(Company.class))).willReturn(companyDTO);
+    // when
+    // then
+        mockMvc.perform(put("/api/v1/companies/1").contentType(MediaType.APPLICATION_JSON_VALUE)
+                    .content(mapper.writeValueAsString(company)))
+                .andExpect(jsonPath("id", is(1)))
+                .andExpect(jsonPath("name", is("oocl")));
+
     }
 }

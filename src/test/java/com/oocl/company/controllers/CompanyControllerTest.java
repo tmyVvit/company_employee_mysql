@@ -70,4 +70,16 @@ public class CompanyControllerTest {
                 .andExpect(jsonPath("$[0].name", is("oocl")));
     }
 
+    @Test
+    public void should_get_companyDTO_when_get_by_id() throws Exception {
+    // given
+        Company company = new Company( 1L, "oocl");
+        CompanyDTO companyDTO = new CompanyDTO(company);
+        given(companyService.getById(1L)).willReturn(companyDTO);
+    // when
+    // then
+        mockMvc.perform(get("/api/v1/companies/1").contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(jsonPath("id", is(1)))
+                .andExpect(jsonPath("name", is("oocl")));
+    }
 }

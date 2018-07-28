@@ -131,4 +131,19 @@ public class CompanyControllerTest {
                 .andExpect(jsonPath("id", is(1)))
                 .andExpect(jsonPath("name", is("oocl")));
     }
+
+    @Test
+    public void should_get_the_company_when_add_employee_to_company() throws Exception {
+    // given
+        Company company = new Company(1L, "oocl");
+        Employee employee = new Employee(1L, "tmy", "male");
+
+        given(companyService.addEmployeeToCompany(1L, 1L)).willReturn(company);
+    // when
+    // then
+        mockMvc.perform(patch("/api/v1/companies/1/employees").contentType(MediaType.APPLICATION_JSON_VALUE)
+                    .content(mapper.writeValueAsString(employee)))
+                .andExpect(jsonPath("id", is(1)))
+                .andExpect(jsonPath("name", is("oocl")));
+    }
 }

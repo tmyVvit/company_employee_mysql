@@ -86,4 +86,16 @@ public class EmployeeRepositoryTest {
         assertThat(employee.getName(), is("name1"));
         assertThat(employee.getGender(), is("male"));
     }
+
+    @Test
+    public void changeNameById(){
+    // given
+        Long id = Long.valueOf(entityManager.persistAndGetId(new Employee( "name1", "male")).toString());
+    // when
+        employeeRepository.changeNameById(id, "oocl");
+        //List<Employee> employees = employeeRepository.findAll();
+        Employee employee = employeeRepository.findById(id).orElse(null);
+    // then
+        assertThat(employee.getName(), is("oocl"));
+    }
 }

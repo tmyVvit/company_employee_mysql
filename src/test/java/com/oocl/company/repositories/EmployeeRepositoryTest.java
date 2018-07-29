@@ -6,6 +6,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import javax.persistence.EntityManager;
@@ -13,6 +14,7 @@ import java.util.List;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest
@@ -46,5 +48,18 @@ public class EmployeeRepositoryTest {
         assertThat(femaleEmployees.get(0).getName(), is("name2"));
         assertThat(femaleEmployees.get(0).getId(), is(2L));
 
+    }
+
+    @Test
+    public void findAll(){
+    // given
+        entityManager.persist(new Employee( "name1", "male"));
+        entityManager.persist(new Employee( "name2", "female"));
+    // when
+        List<Employee> employees = employeeRepository.findAll(PageRequest.of(0,2)).getContent();
+    // then
+        assertThat(employees.size(), is(2));
+        assertThat(employees.get(0).getName(), is("name1"));
+        assertThat(employees.get(1).getName(), is("name2"));
     }
 }

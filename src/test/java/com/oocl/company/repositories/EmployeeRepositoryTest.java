@@ -49,13 +49,26 @@ public class EmployeeRepositoryTest {
     }
 
     @Test
-    public void findAll(){
+    public void findAllByPage(){
     // given
         entityManager.persist(new Employee( "name1", "male"));
         entityManager.persist(new Employee( "name2", "female"));
     // when
-        List<Employee> employees = employeeRepository.findAll(PageRequest.of(0,2)).getContent();
+        List<Employee> employees = employeeRepository.findAll(PageRequest.of(0,1)).getContent();
     // then
+        assertThat(employees.size(), is(1));
+        assertThat(employees.get(0).getName(), is("name1"));
+        //assertThat(employees.get(1).getName(), is("name2"));
+    }
+
+    @Test
+    public void findAll(){
+        // given
+        entityManager.persist(new Employee( "name1", "male"));
+        entityManager.persist(new Employee( "name2", "female"));
+        // when
+        List<Employee> employees = employeeRepository.findAll();
+        // then
         assertThat(employees.size(), is(2));
         assertThat(employees.get(0).getName(), is("name1"));
         assertThat(employees.get(1).getName(), is("name2"));

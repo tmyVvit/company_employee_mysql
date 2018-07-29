@@ -6,6 +6,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -24,7 +25,7 @@ public class EmployeeRepositoryTest {
     private EmployeeRepository employeeRepository;
 
     @Autowired
-    private EntityManager entityManager;
+    private TestEntityManager entityManager;
 
     @After
     public void tearDown() throws Exception{
@@ -42,12 +43,9 @@ public class EmployeeRepositoryTest {
         List<Employee> femaleEmployees = employeeRepository.findByGender("female");
     // then
         assertThat(maleEmployees.size(), is(1));
-        assertThat(maleEmployees.get(0).getId(), is(1L));
         assertThat(maleEmployees.get(0).getName(), is("name1"));
         assertThat(femaleEmployees.size(), is(1));
         assertThat(femaleEmployees.get(0).getName(), is("name2"));
-        assertThat(femaleEmployees.get(0).getId(), is(2L));
-
     }
 
     @Test
@@ -68,8 +66,9 @@ public class EmployeeRepositoryTest {
         // given
         entityManager.persist(new Employee( "name1", "male"));
         entityManager.persist(new Employee( "name2", "female"));
+        Long id = Long.valueOf(entityManager.persistAndGetId(new Employee( "name1", "male")).toString());
         // when
-        Employee employee = employeeRepository.findById(1L).orElse(null);
+        Employee employee = employeeRepository.findById(id).orElse(null);
         // then
         assertThat(employee.getName(), is("name1"));
         assertThat(employee.getGender(), is("male"));

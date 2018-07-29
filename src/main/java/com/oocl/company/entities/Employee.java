@@ -34,6 +34,11 @@ public class Employee {
         this.gender = gender;
     }
 
+    public Employee(String name, String gender){
+        this.name = name;
+        this.gender = gender;
+    }
+
     public Long getId() {
         return id;
     }

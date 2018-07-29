@@ -16,6 +16,7 @@ import java.util.List;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest
@@ -53,5 +54,16 @@ public class CompanyRepositoryTest {
         Company company = companyRepository.findById(id).orElse(null);
         // then
         assertThat(company.getName(), is("oocl2"));
+    }
+
+    @Test
+    public void changeNameById(){
+    // given
+        Long id = Long.valueOf(entityManager.persistAndGetId(new Company("oocl")).toString());
+    // when
+        companyRepository.changeNameById(id, "change");
+        Company company = companyRepository.findById(id).orElse(null);
+    // then
+        assertThat(company.getName(), is("change"));
     }
 }

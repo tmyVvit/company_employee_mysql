@@ -14,6 +14,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import java.util.List;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
 import static org.junit.Assert.assertThat;
 
 @RunWith(SpringRunner.class)
@@ -41,5 +42,16 @@ public class CompanyRepositoryTest {
     // then
         assertThat(companies.size(), is(1));
         assertThat(companies.get(0).getName(), is("oocl1"));
+    }
+
+    @Test
+    public void findById(){
+        // given
+        entityManager.persist(new Company("oocl1"));
+        Long id = Long.valueOf(entityManager.persistAndGetId(new Company("oocl2")).toString());
+        // when
+        Company company = companyRepository.findById(id).orElse(null);
+        // then
+        assertThat(company.getName(), is("oocl2"));
     }
 }

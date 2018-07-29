@@ -62,4 +62,16 @@ public class EmployeeRepositoryTest {
         assertThat(employees.get(0).getName(), is("name1"));
         assertThat(employees.get(1).getName(), is("name2"));
     }
+
+    @Test
+    public void findById(){
+        // given
+        entityManager.persist(new Employee( "name1", "male"));
+        entityManager.persist(new Employee( "name2", "female"));
+        // when
+        Employee employee = employeeRepository.findById(1L).orElse(null);
+        // then
+        assertThat(employee.getName(), is("name1"));
+        assertThat(employee.getGender(), is("male"));
+    }
 }
